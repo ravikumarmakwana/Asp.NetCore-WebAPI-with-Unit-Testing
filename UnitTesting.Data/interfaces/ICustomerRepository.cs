@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
-using UnitTesting.API.Entities;
+using UnitTesting.Entities;
 
-namespace UnitTesting.API.Repositories.interfaces
+namespace UnitTesting.Data.interfaces
 {
     public interface ICustomerRepository
     {

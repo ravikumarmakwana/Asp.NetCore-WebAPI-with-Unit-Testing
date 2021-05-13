@@ -1,11 +1,9 @@
 ﻿using System.Collections.Generic;
-using UnitTesting.API.Contexts;
-using UnitTesting.API.Entities;
-using UnitTesting.API.Repositories.interfaces;
-using System.Linq;
 using System;
+using UnitTesting.Data.interfaces;
+using UnitTesting.Entities;
 
-namespace UnitTesting.API.Repositories.implementations
+namespace UnitTesting.Data.implementations
 {
     public class CustomerRepository : ICustomerRepository
     {
@@ -31,12 +29,17 @@ namespace UnitTesting.API.Repositories.implementations
 
         public Customer GetById(int id)
         {
-            return _context.Customers.FirstOrDefault(s => s.Id == id);
+            var customer = _context.Customers.Find(id);
+            
+            if (customer == null)
+                throw new InvalidOperationException("Invalid Id");
+            
+            return customer;
         }
 
         public void Remove(int id)
         {
-            var customer = GetById(id);
+            var customer = _context.Customers.Find(id);
 
             if (customer == null)
                 throw new InvalidOperationException("Invalid Id");
@@ -47,7 +50,7 @@ namespace UnitTesting.API.Repositories.implementations
 
         public Customer Update(int id, Customer customer)
         {
-            var customerToUpdate = GetById(id);
+            var customerToUpdate = _context.Customers.Find(id);
 
             if (customerToUpdate == null)
                 throw new InvalidOperationException("Invalid Id");

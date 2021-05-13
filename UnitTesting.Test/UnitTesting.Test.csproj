@@ -23,7 +23,10 @@
 
   <ItemGroup>
     <ProjectReference Include="..\UnitTesting.API\UnitTesting.API.csproj" />
+    <ProjectReference Include="..\UnitTesting.Business\UnitTesting.Business.csproj" />
     <ProjectReference Include="..\UnitTesting.Core\UnitTesting.Core.csproj" />
+    <ProjectReference Include="..\UnitTesting.Data\UnitTesting.Data.csproj" />
+    <ProjectReference Include="..\UnitTesting.Entities\UnitTesting.Entities.csproj" />
   </ItemGroup>
 
 </Project>

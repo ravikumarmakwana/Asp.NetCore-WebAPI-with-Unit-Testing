@@ -1,10 +1,10 @@
 ﻿using Moq;
-using UnitTesting.API.Entities;
-using UnitTesting.API.Repositories.interfaces;
-using UnitTesting.API.Services.implementations;
 using FluentAssertions;
 using Xunit;
 using System;
+using UnitTesting.Data.interfaces;
+using UnitTesting.Business.implementations;
+using UnitTesting.Entities;
 
 namespace UnitTesting.Test
 {
@@ -21,9 +21,9 @@ namespace UnitTesting.Test
         }
 
         [Fact]
-        public void CustomerService_ShouldPassWhenReturnExistingCustomer()
+        public void GetById_ShouldPassWhenReturnExistingCustomer()
         {
-            //Arrange
+            int customerId = 1;
             var customer = new Customer()
             {
                 Name = "Test",
@@ -32,34 +32,29 @@ namespace UnitTesting.Test
                 Id = 1
             };
 
-            _customerRepositoryMock.Setup(s => s.GetById(customer.Id))
+            _customerRepositoryMock.Setup(s => s.GetById(customerId))
                 .Returns(customer);
 
-            //Act
-            var result = _sut.GetById(customer.Id);
+            var result = _sut.GetById(customerId);
 
-            //Assert
             result.Should().Be(customer);
         }
 
         [Fact]
-        public void CustomerService_ShouldFailWhenCustomerNotExists()
+        public void GetById_ShouldFailWhenCustomerNotExists()
         {
-            //Arrange
             _customerRepositoryMock.Setup(s => s.GetById(It.IsAny<int>()))
-                .Returns(() => null);
+                .Throws(new InvalidOperationException("Invalid Id"));
 
-            //Act
-            var result = _sut.GetById(It.IsAny<int>());
+            Action result = () => _sut.GetById(It.IsAny<int>());
 
-            //Assert
-            result.Should().Be(null);
+            result.Should().Throw<InvalidOperationException>()
+                .WithMessage("Invalid Id");
         }
 
         [Fact]
-        public void CustomerService_ShouldPassWhenCustomerAddedSuccessfully()
+        public void Add_ShouldPassWhenCustomerAddedSuccessfully()
         {
-            //Arrange
             var customerToAdd = new Customer()
             {
                 Age = 20,
@@ -78,17 +73,14 @@ namespace UnitTesting.Test
             _customerRepositoryMock.Setup(s => s.Add(customerToAdd))
                 .Returns(addedCustomer);
 
-            //Act
             var result = _sut.Add(customerToAdd);
 
-            //Assert
             result.Should().Be(addedCustomer);
         }
 
         [Fact]
-        public void CustomerService_ShouldFailWhenCustomerNotAddedSuccessfully()
+        public void Add_ShouldFailWhenCustomerNotAddedSuccessfully()
         {
-            //Arrange
             var customerToAdd = new Customer()
             {
                 Age = 3,
@@ -97,20 +89,19 @@ namespace UnitTesting.Test
             };
 
             _customerRepositoryMock.Setup(s => s.Add(customerToAdd))
-                .Returns(() => null);
+                .Throws(new InvalidOperationException("Customer not added successfully"));
 
-            //Act
-            var result = _sut.Add(customerToAdd);
+            Action result = () => _sut.Add(customerToAdd);
 
-            //Assert
-            result.Should().Be(null);
+            result.Should().Throw<InvalidOperationException>()
+                .WithMessage("Customer not added successfully");
         }
 
         [Fact]
-        public void CustomerService_ShouldPassWhenCustomerRemoveSuccessfully()
+        public void Remove_ShouldPassWhenCustomerRemoveSuccessfully()
         {
-            //Arrange
             int customerId = 1;
+
             var customer = new Customer()
             {
                 Id = 1,
@@ -119,44 +110,31 @@ namespace UnitTesting.Test
                 EmailAddress = "Test@gmail.com"
             };
 
-            _customerRepositoryMock.Setup(s => s.GetById(customerId))
-                .Returns(customer);
-
-            _customerRepositoryMock.Setup(s => s.Remove(customerId))
-                .Verifiable();
-
-            //Act
             Action act = () => _sut.Remove(customerId);
 
-            //Assert
             act.Should().NotThrow<InvalidOperationException>();
+            _customerRepositoryMock.Verify(s => s.Remove(customerId), Times.Once);
         }
 
         [Fact]
-        public void CustomerService_ShouldFailWhenCustomerNotRemoveSuccessfully()
+        public void Remove_ShouldFailWhenCustomerNotRemoveSuccessfully()
         {
-            //Arrange
             int customerId = 1;
+            _customerRepositoryMock.Setup(s => s.Remove(customerId))
+                .Throws(new InvalidOperationException("Invalid Id"));
 
-            _customerRepositoryMock.Setup(s => s.GetById(customerId))
-                .Returns(() => null);
+            Action result = () => _sut.Remove(customerId);
 
-            //Act
-            Action act = () => _sut.Remove(customerId);
-
-            //Assert
-            act.Should().Throw<InvalidOperationException>()
+            result.Should().Throw<InvalidOperationException>()
                 .WithMessage("Invalid Id");
         }
 
         [Fact]
-        public void CustomerService_ShouldPassWhenCustomerUpdatedSuccessfully()
+        public void Update_ShouldPassWhenCustomerShouldUpdateSuccessfully()
         {
-            //Arrange
             var customerId = 1;
             var customerToUpdate = new Customer()
             {
-                Id = 1,
                 Name = "Test",
                 Age = 20,
                 EmailAddress = "Test@outlook.com"
@@ -170,39 +148,32 @@ namespace UnitTesting.Test
                 EmailAddress = "Test@outlook.com"
             };
 
-            _customerRepositoryMock.Setup(s => s.GetById(customerId))
-                .Returns(customerToUpdate);
-
             _customerRepositoryMock.Setup(s => s.Update(customerId, customerToUpdate))
                 .Returns(updatedCustomer);
 
-            //Act
             var result = _sut.Update(customerId, customerToUpdate);
 
-            //Assert
             result.Should().Be(updatedCustomer);
         }
 
         [Fact]
-        public void CustomerService_ShouldFailWhenCustomerNotUpdatedSuccessfully()
+        public void Update_ShouldFailWhenCustomerShouldNotUpdateSuccessfully()
         {
-            //Arrange
             var customerId = 1;
             var customerToUpdate = new Customer()
             {
-                Id = 1,
                 Name = "Test",
                 Age = 20,
                 EmailAddress = "Test@outlook.com"
             };
+           
+            _customerRepositoryMock.Setup(s => s.Update(customerId, customerToUpdate))
+                .Throws(new InvalidOperationException("Invalid Id"));
 
-            //Act
-            _customerRepositoryMock.Setup(s=>s.GetById(customerId))
-                .Returns(() => null);
+            Action result = () => _sut.Update(customerId, customerToUpdate);
 
-            //Assert
-            _customerRepositoryMock.Verify(s => s.GetById(customerId), Times.Once);
-            _customerRepositoryMock.Verify(s => s.Update(customerId,customerToUpdate), Times.Never);
+            result.Should().ThrowExactly<InvalidOperationException>()
+                .WithMessage("Invalid Id");
         }
     }
 }

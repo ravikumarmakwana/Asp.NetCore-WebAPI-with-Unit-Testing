@@ -1,6 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore.Migrations;
 
-namespace UnitTesting.API.Migrations
+namespace UnitTesting.Data.Migrations
 {
     public partial class Initial : Migration
     {

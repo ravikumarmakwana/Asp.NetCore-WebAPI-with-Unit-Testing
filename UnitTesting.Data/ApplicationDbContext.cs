@@ -1,7 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using UnitTesting.API.Entities;
+using UnitTesting.Entities;
 
-namespace UnitTesting.API.Contexts
+namespace UnitTesting.Data
 {
     public class ApplicationDbContext : DbContext
     {

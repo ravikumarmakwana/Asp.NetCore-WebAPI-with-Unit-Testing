@@ -1,4 +1,4 @@
-﻿namespace UnitTesting.API.Entities
+﻿namespace UnitTesting.Entities
 {
     public class Customer
     {

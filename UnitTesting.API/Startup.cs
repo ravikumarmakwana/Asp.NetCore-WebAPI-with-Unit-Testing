@@ -5,13 +5,13 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
-using UnitTesting.API.Contexts;
-using UnitTesting.API.Controller;
-using UnitTesting.API.Repositories.implementations;
-using UnitTesting.API.Repositories.interfaces;
-using UnitTesting.API.Services.implementations;
-using UnitTesting.API.Services.interfaces;
-using UnitTesting.API.Validations;
+using UnitTesting.Business.implementations;
+using UnitTesting.Business.interfaces;
+using UnitTesting.Core;
+using UnitTesting.Data;
+using UnitTesting.Data.implementations;
+using UnitTesting.Data.interfaces;
+using UnitTesting.Validations;
 
 namespace UnitTesting.API
 {

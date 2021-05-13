@@ -1,24 +1,24 @@
 ﻿using FluentValidation.TestHelper;
-using UnitTesting.API.Entities;
-using UnitTesting.API.Validations;
+using UnitTesting.Entities;
+using UnitTesting.Validations;
 using Xunit;
 
 namespace UnitTesting.Test
 {
-    public class CustomerValidationTest
+    public class CustomerValidatorTest
     {
         private readonly CustomerValidation _sut;
 
-        public CustomerValidationTest()
+        public CustomerValidatorTest()
         {
             _sut = new CustomerValidation();
         }
 
         [Fact]
-        public void CustomerValidation_ShouldPassWhenNameIsNotNull()
+        public void CustomerValidator_ShouldPassWhenNameIsNotNull()
         {
             _sut.ShouldNotHaveValidationErrorFor(
-                s=>s.Name,
+                s => s.Name,
                 new Customer()
                 {
                     Name = "Test"
@@ -27,7 +27,7 @@ namespace UnitTesting.Test
         }
 
         [Fact]
-        public void CustomerValidation_ShouldFailWhenNameIsNull()
+        public void CustomerValidator_ShouldFailWhenNameIsNull()
         {
             _sut.ShouldHaveValidationErrorFor(
                 s => s.Name,
@@ -39,19 +39,19 @@ namespace UnitTesting.Test
         }
 
         [Fact]
-        public void CustomerValidation_ShouldPassWhenAgeGreaterThanOrEqualTo18()
+        public void CustomerValidator_ShouldPassWhenAgeIsGreaterThanOrEqualTo18()
         {
             _sut.ShouldNotHaveValidationErrorFor(
                 s => s.Age,
                 new Customer()
                 {
-                    Age = 18
+                    Age = 19
                 }
                 );
         }
 
         [Fact]
-        public void CustomerValidation_ShouldFailWhenAgeLessThan18()
+        public void CustomerValidator_ShouldFailWhenAgeIsLessThan18()
         {
             _sut.ShouldHaveValidationErrorFor(
                 s => s.Age,
@@ -63,7 +63,7 @@ namespace UnitTesting.Test
         }
 
         [Fact]
-        public void CustomerValidation_ShouldPassWhenValidEmailAddressFormate()
+        public void CustomerValidator_ShouldPassWhenEmailAddressShouldHaveValidFormate()
         {
             _sut.ShouldNotHaveValidationErrorFor(
                 s => s.EmailAddress,
@@ -75,7 +75,7 @@ namespace UnitTesting.Test
         }
 
         [Fact]
-        public void CustomerValidation_ShouldFailWhenInvalidEmailAddressFormate()
+        public void CustomerValidatpr_ShouldFailWhenEmailAddressShouldNotHaveValidFormate()
         {
             _sut.ShouldHaveValidationErrorFor(
                 s => s.EmailAddress,

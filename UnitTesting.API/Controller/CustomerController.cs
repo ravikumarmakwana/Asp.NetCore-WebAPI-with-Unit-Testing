@@ -1,8 +1,10 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using Microsoft.AspNetCore.Mvc;
-using UnitTesting.API.Entities;
-using UnitTesting.API.Services.interfaces;
-using UnitTesting.API.Validations;
+using UnitTesting.Business.interfaces;
+using UnitTesting.Core;
+using UnitTesting.Entities;
+using UnitTesting.Validations;
 
 namespace UnitTesting.API.Controller
 {
@@ -24,6 +26,7 @@ namespace UnitTesting.API.Controller
         [HttpGet]
         public IEnumerable<Customer> GetAll()
         {
+            _logger.LogInformation("Method call GetAll");
             return _customerService.GetAll();
         }
 
@@ -40,10 +43,13 @@ namespace UnitTesting.API.Controller
             var result = _validationRules.Validate(customer);
 
             if (!result.IsValid)
-                return null;
+                throw new InvalidOperationException(result.ToString());
+
+            var addedCustomer = _customerService.Add(customer);
 
             _logger.LogInformation("Customer Added Successfully");
-            return _customerService.Add(customer);
+
+            return addedCustomer;
         }
 
         [HttpPut("{id}")]
@@ -52,11 +58,13 @@ namespace UnitTesting.API.Controller
             var result = _validationRules.Validate(customer);
 
             if (!result.IsValid)
-                return null;
+                throw new InvalidOperationException(result.ToString());
+
+            var updatedCustomer = _customerService.Update(id, customer);
 
             _logger.LogInformation("Customer Updated Successfully");
 
-            return _customerService.Update(id, customer);
+            return updatedCustomer;
         }
 
         [HttpDelete("{id}")]

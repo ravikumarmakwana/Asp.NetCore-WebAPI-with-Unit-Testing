@@ -1,10 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using UnitTesting.API.Entities;
-using UnitTesting.API.Repositories.interfaces;
-using UnitTesting.API.Services.interfaces;
+﻿using System.Collections.Generic;
+using UnitTesting.Business.interfaces;
+using UnitTesting.Data.interfaces;
+using UnitTesting.Entities;
 
-namespace UnitTesting.API.Services.implementations
+namespace UnitTesting.Business.implementations
 {
     public class CustomerService : ICustomerService
     {
@@ -32,21 +31,11 @@ namespace UnitTesting.API.Services.implementations
 
         public void Remove(int id)
         {
-            var customer = _customerRepository.GetById(id);
-
-            if (customer == null)
-                throw new InvalidOperationException("Invalid Id");
-
             _customerRepository.Remove(id);
         }
 
         public Customer Update(int id, Customer customer)
         {
-            var customerToUpdate = _customerRepository.GetById(id);
-
-            if (customerToUpdate == null)
-                throw new InvalidOperationException("Invalid Id");
-
             return _customerRepository.Update(id, customer);
         }
     }

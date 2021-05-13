@@ -1,4 +1,4 @@
-﻿namespace UnitTesting.API.Controller
+﻿namespace UnitTesting.Core
 {
     public interface ILogger
     {

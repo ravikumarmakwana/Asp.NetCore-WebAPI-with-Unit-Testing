@@ -1,9 +1,11 @@
-﻿using FluentAssertions;
+﻿using System;
+using FluentAssertions;
 using Moq;
 using UnitTesting.API.Controller;
-using UnitTesting.API.Entities;
-using UnitTesting.API.Services.interfaces;
-using UnitTesting.API.Validations;
+using UnitTesting.Business.interfaces;
+using UnitTesting.Core;
+using UnitTesting.Entities;
+using UnitTesting.Validations;
 using Xunit;
 
 namespace UnitTesting.Test
@@ -25,9 +27,8 @@ namespace UnitTesting.Test
         }
 
         [Fact]
-        public void CustomerController_ShouldPassWhen_CustomerAddedSuccessfully()
+        public void Add_ShouldPassWhenCustomerAddedSuccessfully()
         {
-            //Arrange
             var customerToAdd = new Customer()
             {
                 Age = 18,
@@ -43,22 +44,43 @@ namespace UnitTesting.Test
                 EmailAddress = "Test@google.com"
             };
 
-            _customerServiceMock.Setup(s => s.Add(customerToAdd)).Returns(addedCustomer);
-
-            //Act
             var validationResult = _customerValidation.Validate(customerToAdd);
+
+            _customerServiceMock.Setup(s => s.Add(customerToAdd))
+                .Returns(addedCustomer);
+
             var result = _sut.Add(customerToAdd);
 
-            //Assert
+            result.Should().Be(addedCustomer);
             validationResult.IsValid.Should().BeTrue();
             _loggerMock.Verify(s => s.LogInformation("Customer Added Successfully"), Times.Once);
-            result.Should().Be(addedCustomer);
         }
 
         [Fact]
-        public void CustomerController_ShouldFailWhen_CustomerNotAddedSuccessfully()
+        public void Add_ShouldFailWhenCustomerNotAddedSuccessfully()
         {
-            //Arrange
+            var customerToAdd = new Customer()
+            {
+                Age = 19,
+                Name = "Test",
+                EmailAddress = "Test@tarktech.com"
+            };
+
+            var validationResult = _customerValidation.Validate(customerToAdd);
+
+            _customerServiceMock.Setup(s => s.Add(customerToAdd))
+                .Returns(() => null);
+
+            var result = _sut.Add(customerToAdd);
+
+            validationResult.IsValid.Should().BeTrue();
+            _loggerMock.Verify(s => s.LogInformation("Customer Added Successfully"), Times.Once);
+            result.Should().Be(null);
+        }
+
+        [Fact]
+        public void Add_ShouldFailWhenCustomerValidationShouldFail()
+        {
             var customerToAdd = new Customer()
             {
                 Age = 10,
@@ -66,21 +88,21 @@ namespace UnitTesting.Test
                 EmailAddress = "Test@tarktech.com"
             };
 
-            //Act
             var validationResult = _customerValidation.Validate(customerToAdd);
-            var result = _sut.Add(customerToAdd);
 
-            //Assert
+            Action result = () => _sut.Add(customerToAdd);
+
             validationResult.IsValid.Should().BeFalse();
-            validationResult.ToString().Should().Be(CustomerValidation.AgeMustBeGreaterThanOrEqualTo18);
+            result.Should().Throw<InvalidOperationException>()
+                .WithMessage(CustomerValidation.AgeMustBeGreaterThanOrEqualTo18);
             _loggerMock.Verify(s => s.LogInformation("Customer Added Successfully"), Times.Never);
-            result.Should().Be(null);
+            _customerServiceMock.Verify(s => s.Add(customerToAdd), Times.Never);
         }
 
         [Fact]
-        public void CustomerController_ShouldPassWhen_ReturnExistingCustomer()
+        public void GetById_ShouldPassWhenReturnExistingCustomer()
         {
-            //Arrange
+            var customerId = 1;
             var customer = new Customer()
             {
                 Id = 1,
@@ -89,28 +111,130 @@ namespace UnitTesting.Test
                 EmailAddress = "Test@vvpec.com"
             };
 
-            _customerServiceMock.Setup(s => s.GetById(1)).Returns(customer);
+            _customerServiceMock.Setup(s => s.GetById(customerId))
+                .Returns(customer);
 
-            //Act
-            var result = _sut.GetById(1);
+            var result = _sut.GetById(customerId);
 
-            //Assert
             _loggerMock.Verify(s => s.LogInformation("Method call GetById"), Times.Once);
             result.Should().Be(customer);
         }
 
         [Fact]
-        public void CustomerController_ShouldPassWhen_CustomerNotExists()
+        public void GetById_ShouldFailWhenCustomerNotExists()
         {
-            //Arrange
-            _customerServiceMock.Setup(s => s.GetById(It.IsAny<int>())).Returns(() => null);
+            _customerServiceMock.Setup(s => s.GetById(It.IsAny<int>()))
+                .Throws(new InvalidOperationException("Invalid Id"));
 
-            //Act
-            var result = _sut.GetById(It.IsAny<int>());
+            Action result = () => _sut.GetById(It.IsAny<int>());
 
-            //Assert
+            result.Should().Throw<InvalidOperationException>()
+                .WithMessage("Invalid Id");
             _loggerMock.Verify(s => s.LogInformation("Method call GetById"), Times.Once);
-            result.Should().Be(null);
+        }
+
+        [Fact]
+        public void Update_ShouldPassWhenCustomerUpdatedSuccessfully()
+        {
+            int customerId = 1;
+            var customerToUpdate = new Customer()
+            {
+                Name = "Test Customer",
+                EmailAddress = "Test@gmail.com",
+                Age = 30
+            };
+
+            var updatedCustomer = new Customer()
+            {
+                Id = 1,
+                Name = "Test Customer",
+                EmailAddress = "Test@gmail.com",
+                Age = 30
+            };
+
+            var validationResult = _customerValidation.Validate(customerToUpdate);
+
+            _customerServiceMock.Setup(s => s.Update(customerId, customerToUpdate))
+                .Returns(updatedCustomer);
+
+            var result = _sut.Update(customerId, customerToUpdate);
+
+            validationResult.IsValid.Should().BeTrue();
+            result.Should().Be(updatedCustomer);
+            _loggerMock.Verify(s => s.LogInformation("Customer Updated Successfully"), Times.Once);
+        }
+
+        [Fact]
+        public void Update_ShouldFailWhenCustomerNotUpdatedSuccessfullyWhenValidationFail()
+        {
+            int customerId = 1;
+            var customerToUpdate = new Customer()
+            {
+                Name = "Test Customer",
+                EmailAddress = "Test@gmail.com",
+                Age = 10
+            };
+
+            var validationResult = _customerValidation.Validate(customerToUpdate);
+
+            Action result = () => _sut.Update(customerId, customerToUpdate);
+
+            result.Should().Throw<InvalidOperationException>()
+                .WithMessage(CustomerValidation.AgeMustBeGreaterThanOrEqualTo18);
+            validationResult.IsValid.Should().BeFalse();
+            _customerServiceMock.Verify(s => s.Update(customerId, customerToUpdate), Times.Never);
+            _loggerMock.Verify(s => s.LogInformation("Customer Updated Successfully"), Times.Never);
+        }
+
+        [Fact]
+        public void Update_ShouldFailWhenCustomerNotUpdatedSuccessfullyWhenCustomerNotFound()
+        {
+            int customerId = 1;
+            var customerToUpdate = new Customer()
+            {
+                Name = "Test Customer",
+                EmailAddress = "Test@gmail.com",
+                Age = 40
+            };
+
+            var validationResult = _customerValidation.Validate(customerToUpdate);
+
+            _customerServiceMock.Setup(s => s.Update(customerId, customerToUpdate))
+                .Throws(new InvalidOperationException("Invalid Id"));
+
+            Action result = () => _sut.Update(customerId, customerToUpdate);
+
+            validationResult.IsValid.Should().BeTrue();
+            result.Should().ThrowExactly<InvalidOperationException>()
+                .WithMessage("Invalid Id");
+            _loggerMock.Verify(s => s.LogInformation("Customer Updated Successfully"), Times.Never);
+        }
+
+        [Fact]
+        public void Remove_ShouldPassWhenCustomerRemoveSuccessfully()
+        {
+            int customerId = 1;
+
+            Action result = () => _sut.Remove(customerId);
+
+            result.Should().NotThrow<InvalidOperationException>();
+            _customerServiceMock.Verify(s => s.Remove(customerId), Times.Once);
+            _loggerMock.Verify(s => s.LogInformation("Customer Deleted Successfully"), Times.Once);
+        }
+
+        [Fact]
+        public void Remove_ShouldFailWhenCustomerNotRemoveSuccessfully()
+        {
+            int customerId = 1;
+
+            _customerServiceMock.Setup(s => s.Remove(customerId))
+                .Throws(new InvalidOperationException("Invalid Id"));
+
+            Action result = () => _sut.Remove(customerId);
+
+            result.Should().Throw<InvalidOperationException>()
+                .WithMessage("Invalid Id");
+            _loggerMock.Verify(s => s.LogInformation("Customer Deleted Successfully"), Times.Never);
         }
     }
 }

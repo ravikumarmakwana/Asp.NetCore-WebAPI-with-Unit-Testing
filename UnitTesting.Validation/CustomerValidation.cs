@@ -1,7 +1,7 @@
 ﻿using FluentValidation;
-using UnitTesting.API.Entities;
+using UnitTesting.Entities;
 
-namespace UnitTesting.API.Validations
+namespace UnitTesting.Validations
 {
     public class CustomerValidation : AbstractValidator<Customer>
     {

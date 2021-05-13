@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
-using UnitTesting.API.Entities;
+using UnitTesting.Entities;
 
-namespace UnitTesting.API.Services.interfaces
+namespace UnitTesting.Business.interfaces
 {
     public interface ICustomerService
     {
